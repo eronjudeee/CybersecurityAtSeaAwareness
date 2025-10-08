@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Ship Cyber Awareness — Demo</title>
+  <meta name="description" content="Cybersecurity awareness demo for ships. Simulation only." />
+  <style>
+    :root{
+      --bg:#0b0f14;
+      --card:#0f1720;
+      --muted:#94a3b8;
+      --accent:#ff375f;
+      --accent2:#ffb86b;
+      --glass: rgba(255,255,255,0.03);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{height:100%}
+    body{
+      margin:0;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0)) ,
+        radial-gradient(1000px 600px at 10% 10%, rgba(255,67,89,0.03), transparent 8%),
+        var(--bg);
+      color:#e6eef6;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+    .container{
+      width:100%;
+      max-width:820px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:12px;
+      box-shadow: 0 8px 30px rgba(2,6,23,0.7);
+      padding:28px;
+      border: 1px solid rgba(255,255,255,0.03);
+    }
+    header{display:flex;gap:16px;align-items:center;margin-bottom:18px}
+    .logo{
+      width:56px;height:56px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px;
+      color:#08101a;
+      box-shadow: 0 6px 18px rgba(255,56,90,0.12);
+    }
+    h1{margin:0;font-size:20px}
+    p.lead{margin:6px 0 0;color:var(--muted);font-size:14px}
+    .card{
+      margin-top:16px;
+      padding:20px;
+      background:var(--glass);
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,0.02);
+    }
+    form{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    input[type="text"]{
+      flex:1;min-width:180px;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);
+      background:transparent;color:inherit;font-size:15px;
+    }
+    button{
+      padding:10px 14px;border-radius:8px;border:0;background:linear-gradient(90deg,var(--accent),var(--accent2));
+      color:#08101a;font-weight:600;cursor:pointer;
+      box-shadow: 0 6px 20px rgba(255,56,90,0.12);
+    }
+    .small{font-size:13px;color:var(--muted)}
+    /* GLITCH overlay */
+    .overlay{
+      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;
+    }
+    .glitch-card{
+      pointer-events:auto;
+      width:92%;max-width:760px;padding:28px;border-radius:12px;background:linear-gradient(180deg,#08121a,#0b1014);
+      border:1px solid rgba(255,0,0,0.06);box-shadow: 0 20px 60px rgba(0,0,0,0.7);
+      color:#fff;text-align:center;transform:translateZ(0);
+    }
+    .redbar{height:6px;width:100%;background:linear-gradient(90deg,#ff375f,#ffb86b);margin-bottom:14px;border-radius:4px}
+    .hacked{
+      font-size:22px;font-weight:700;letter-spacing:0.6px;margin:6px 0;
+      text-shadow: 0 6px 28px rgba(255,55,95,0.12);
+    }
+    .muted{color:#a8bdcf;font-size:13px;margin-top:6px}
+    .leak-list{margin-top:14px;text-align:left;max-height:200px;overflow:auto;padding:12px;background:rgba(0,0,0,0.25);border-radius:8px}
+    .leak-item{display:flex;justify-content:space-between;padding:6px 8px;border-bottom:1px dashed rgba(255,255,255,0.03)}
+    .label{color:#9fb0c9;font-size:13px}
+    .value{font-weight:700}
+    /* flash / error lights */
+    .error-lights{
+      display:flex;gap:8px;justify-content:center;margin-top:10px;
+    }
+    .light{width:12px;height:12px;border-radius:50%;opacity:0.8;box-shadow:0 4px 12px rgba(0,0,0,0.5)}
+    .l1{background:rgba(255,55,95,0.9);animation:flash 900ms linear infinite}
+    .l2{background:rgba(255,184,107,0.95);animation:flash 1200ms linear 200ms infinite}
+    .l3{background:rgba(255,55,95,0.9);animation:flash 700ms linear 400ms infinite}
+    @keyframes flash{0%{opacity:0.08;transform:scale(0.9)}50%{opacity:1;transform:scale(1.1)}100%{opacity:0.08;transform:scale(0.95)}}
+    /* GLITCH text effect */
+    .glitch-text{
+      position:relative;display:inline-block;
+    }
+    .glitch-text::before, .glitch-text::after{
+      content:attr(data-text);position:absolute;left:0;top:0;mix-blend-mode:screen;
+      clip-path:polygon(0 0,100% 0,100% 45%,0 45%);
+      transform:translate(0,0);
+    }
+    .glitch-text::before{color:#ff3b67;z-index:3;animation:gtop 2s infinite linear}
+    .glitch-text::after{color:#ffb86b;z-index:2;animation:gbot 1.4s infinite linear}
+    @keyframes gtop{0%{transform:translate(-2px,-2px)}50%{transform:translate(2px,2px)}100%{transform:translate(-2px,-2px)}}
+    @keyframes gbot{0%{transform:translate(2px,1px)}50%{transform:translate(-2px,-1px)}100%{transform:translate(2px,1px)}}
+    /* debrief */
+    .debrief{margin-top:16px;padding:14px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));border-radius:8px}
+    a.btn-link{display:inline-block;margin-top:10px;padding:10px 12px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--accent);text-decoration:none}
+    footer{margin-top:14px;color:var(--muted);font-size:13px}
+    @media(max-width:520px){
+      .hacked{font-size:18px}
+      header{gap:10px}
+    }
+  </style>
+</head>
+<body>
+  <div class="container" role="main" aria-labelledby="title">
+    <header>
+      <div class="logo">SEA</div>
+      <div>
+        <h1 id="title">Ship Cyber Awareness — Quick Demo</h1>
+        <p class="lead">Scan the QR, enter a first name, and watch a short simulation. This is a simulated awareness demo.</p>
+      </div>
+    </header>
+
+    <section class="card" aria-label="main card">
+      <div id="step-form">
+        <p class="small">Please enter your <strong>first name</strong> (or a nickname). Only a name is requested — this demo is simulated.</p>
+        <form id="nameForm" onsubmit="return false;">
+          <input id="nameInput" type="text" placeholder="Your first name" required minlength="1" maxlength="30" autocomplete="off" />
+          <button id="startBtn" type="submit">Check Device</button>
+        </form>
+        <p class="small" style="margin-top:8px">By participating you consent to viewing a short simulated demo and debrief. No sensitive personal data is requested or stored unless you opt in on the final page.</p>
+      </div>
+
+      <div id="after" style="display:none">
+        <!-- placeholder shown after process complete -->
+      </div>
+
+      <div id="debrief" style="display:none" class="debrief" aria-live="polite">
+        <h3 style="margin:0">Debrief — This was a SIMULATION</h3>
+        <p class="small" style="margin-top:8px">
+          This demo showed how easily a device *can appear* compromised when a user installs an app or follows unsafe links. We did <strong>not</strong> access or leak any real private data. The "leaked" fields were generated for demonstration.
+        </p>
+        <p class="small">
+          Key takeaways:
+          <ul style="margin:8px 0 0 18px;color:var(--muted)">
+            <li>Never install unknown apps or follow suspicious links on your ship's network.</li>
+            <li>Use strong device locks and enable automatic updates.</li>
+            <li>Report suspicious activity to your IT/security officer immediately.</li>
+          </ul>
+        </p>
+        <a class="btn-link" href="#" id="resourcesBtn">Show resources & tips</a>
+        <p class="small" style="margin-top:10px">Want to opt out of aggregated logs? Click <a href="#" id="optout">here</a>.</p>
+      </div>
+
+      <footer>
+        Demo built for training. After the simulation you'll see how many people visited this link (if tracking is configured by the organizer).
+      </footer>
+    </section>
+  </div>
+
+  <!-- GLITCH overlay (shown briefly) -->
+  <div id="overlay" class="overlay" style="display:none">
+    <div class="glitch-card" role="dialog" aria-modal="true">
+      <div class="redbar"></div>
+      <div class="hacked">
+        <span class="glitch-text" id="glitchTitle" data-text="YOUR DEVICE IS SUCCESSFULLY HACKED">YOUR DEVICE IS SUCCESSFULLY HACKED</span>
+      </div>
+      <div class="muted" id="glitchSub">Simulated — Do not panic. This is a training exercise.</div>
+
+      <div class="leak-list" id="leakList" aria-live="polite" style="margin-top:16px">
+        <!-- leaked items inserted by JS -->
+      </div>
+
+      <div class="error-lights" aria-hidden="true">
+        <div class="light l1"></div>
+        <div class="light l2"></div>
+        <div class="light l3"></div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* CONFIG: tracking options - add your own GA4 measurement ID or serverless logging endpoint if you want */
+const CONFIG = {
+  ga4_measurement_id: '', // e.g. 'G-XXXXXXXXXX' (leave empty if not using)
+  serverless_log_endpoint: '', // e.g. 'https://your-deploy.netlify.app/.netlify/functions/log' OR 'https://your-vercel-endpoint/api/log'
+  simulateDelayMs: 3200 // how long to run the glitch animation before showing debrief
+};
+
+/* -- Google Analytics (optional) -- load GA4 if provided */
+if(CONFIG.ga4_measurement_id){
+  (function(){
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', CONFIG.ga4_measurement_id);
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = 'https://www.googletagmanager.com/gtag/js?id='+CONFIG.ga4_measurement_id;
+    document.head.appendChild(s);
+  })();
+}
+
+/* helper to post tracking call to serverless logger if configured */
+async function logVisit(payload){
+  // best-effort: do not break the demo if logging fails
+  try{
+    if(CONFIG.serverless_log_endpoint){
+      await fetch(CONFIG.serverless_log_endpoint, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify(payload)
+      });
+    }
+    // If GA set up, send event
+    if(window.gtag){
+      window.gtag('event','demo_visit', payload);
+    }
+  }catch(e){
+    // fail silently
+    console.warn('Logging failed', e);
+  }
+}
+
+/* form handling */
+const nameForm = document.getElementById('nameForm');
+const nameInput = document.getElementById('nameInput');
+const overlay = document.getElementById('overlay');
+const leakList = document.getElementById('leakList');
+const debrief = document.getElementById('debrief');
+const after = document.getElementById('after');
+const optout = document.getElementById('optout');
+
+function randChoice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+nameForm.addEventListener('submit', async () => {
+  const raw = (nameInput.value || '').trim();
+  const name = raw ? raw.split(' ')[0].slice(0,24) : 'Guest';
+  // log visit (non-sensitive payload)
+  logVisit({event:'scan', name_initial:name, timestamp:new Date().toISOString(), url:location.href, ua:navigator.userAgent});
+  // show glitch overlay
+  showGlitch(name);
+});
+
+function showGlitch(name){
+  // build leak items (SIMULATION)
+  const fakeLeaks = [
+    {label:'Owner name', value: name},
+    {label:'Device model', value: randChoice(['Android • Samsung S9','iPhone 12','Windows Laptop','iPad Pro'])},
+    {label:'Nearby Wi-Fi', value: '[REDACTED]'},
+    {label:'Approx. location', value: randChoice(['At sea (approx.)','Port area, PH','International waters'])},
+    {label:'Last opened app', value: randChoice(['ShipLog','CrewChat','Unknown'])},
+    {label:'Possible exposed port', value: randChoice(['SSH:22','Telnet:23','RDP:3389'])}
+  ];
+
+  leakList.innerHTML = '';
+  fakeLeaks.forEach((it, i) => {
+    const div = document.createElement('div');
+    div.className = 'leak-item';
+    div.innerHTML = '<div class="label">'+it.label+'</div><div class="value">'+it.value+'</div>';
+    leakList.appendChild(div);
+  });
+
+  // show overlay
+  overlay.style.display = 'flex';
+  // hide main form
+  document.getElementById('step-form').style.display = 'none';
+
+  // after some time, hide overlay and show debrief
+  setTimeout(()=>{
+    overlay.style.display = 'none';
+    showDebrief();
+  }, CONFIG.simulateDelayMs);
+}
+
+function showDebrief(){
+  debrief.style.display = 'block';
+  // optional aggregated visitor count note (only if GA or serverless used)
+  const note = document.createElement('p');
+  note.className = 'small';
+  note.style.marginTop = '10px';
+  note.innerHTML = '<strong>Organizer note:</strong> aggregate visit counts are available if tracking is configured (GA4 or serverless logger).';
+  debrief.appendChild(note);
+}
+
+/* resources button handler */
+document.getElementById('resourcesBtn').addEventListener('click', (e)=>{
+  e.preventDefault();
+  window.open('https://www.cisa.gov/stopransomware', '_blank'); // example resource — organizer may replace
+});
+
+/* opt-out handler (clears any local consent/log flags) */
+optout.addEventListener('click', (e)=>{
+  e.preventDefault();
+  localStorage.setItem('cyber_demo_optout', '1');
+  alert('You have opted out of organizer logs (if the organizer respects this flag). Note: this demo still runs locally.');
+});
+
+/* On page load: attempt to send a pageview / quick ping for QR scans (organizer can rely on GA or serverless) */
+window.addEventListener('load', () => {
+  const utm = (new URLSearchParams(location.search));
+  const viaQR = utm.get('utm_medium') === 'qr' || utm.get('utm_source') === 'seminar';
+  logVisit({event:'page_load', via_qr:!!viaQR, timestamp:new Date().toISOString(), url:location.href});
+});
+
+</script>
+</body>
+</html>
